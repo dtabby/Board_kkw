@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board">
+	<sql id="boardWhere">
+		<where>
+			<if test="boardSearch != null and boardSerach != ''">
+				<choose>
+					<when test="boardSearch == 'boardName'">
+						name LIKE '%${boardWord}%'
+					</when>
+					<when test="boardSearch == 'boardId'">
+						id LIKE '%${boardWord}%'
+					</when>
+					<when test="boardSearch == 'boardContent'">
+						content LIKE '%${boardWord}%'
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+	
+	<select id="boardSelect" resultType="board" parameterType="map">
+		<!-- map일떄, num, id, name, content를 결과값으로 담음 -->
+		<!-- BoardVO일떄, num, id, name, content 결과값으로 담음 -->
+		<!-- BoardVO : num, id, name, content 만 담믈 수있고, map은 num, id, name, content 이외의 것도 결과값으로 담을 수 있음-->
+		SELECT
+			num, id, name, content
+		FROM 
+			BOARD
+		<include refid="boardWhere"/>
+		ORDER BY num DESC
+	</select>
+	
+	<!-- resultType : output이라고 생각하면 편함 -->
+	<select id="boardDetailSelect" resultType="board">
+		SELECT 
+			num, id, name, content
+		FROM 
+			BOARD
+		WHERE 
+			num = #{num}
+	</select>
+	
+	<!-- parameterType : input이라고 생각하면 편함 -->
+	<insert id="boardInsert" parameterType="board">
+		<!-- selectKey : 시퀀스 추가 해줘야 함 -->
+		<selectKey keyProperty="num" resultType="Integer" order="BEFORE">
+			select NUM.nextval from dual
+		</selectKey>
+		INSERT INTO board (
+		    num,
+		    id,
+		    name,
+		    content
+		) VALUES (
+		    #{num},
+			#{id},
+			#{name},
+			#{content}
+		)
+	</insert>
+	
+	<update id="boardUpdate">
+		UPDATE
+			board
+		SET
+			id = #{id},
+			name = #{name},
+			content = #{content}
+		WHERE
+			num = #{num}
+	</update>
+	
+	<delete id="boardDelete">
+		delete board
+		where num = #{num}
+	</delete>
+	
+	<!-- <select id="paging" resultType="com.topia.myapp.vo.PagingVO">
+		select num, id, name, content
+		from (
+		    select num, id, name, content,
+		        row_number() over(order by num desc) as rNum
+		    from board
+		    ) b
+		where rNum between ${rowStart} and ${rowEnd} 
+		order by num desc;
+	</select> -->
+</mapper>

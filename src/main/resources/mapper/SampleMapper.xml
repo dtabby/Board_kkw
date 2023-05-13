@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sample">
+	
+	<select id="sampleSelect" resultType="com.topia.myapp.vo.MemoVO">
+		SELECT
+			memo_num as memoNum,
+			user_id as userId,
+			user_name as userName,
+			update_id as updateId,
+			title,
+			trim(content) as content,
+			NVL(notice_YN, 'N') as noticeYN,
+			trim(content_reply) as contentReply,
+			TO_CHAR(write_date, 'YYYY-MM-DD') as writeDate
+		FROM
+			memo_kkw
+		ORDER BY DECODE(notice_yn, 'Y', 1), regist_date DESC
+	</select>
+	
+
+</mapper>

@@ -1,0 +1,123 @@
+@charset "UTF-8";
+
+h1 {
+	margin-top: 5px;
+	text-align: center;
+	color: #78a411;
+	font-size: 40px;
+}
+
+.h1 {
+	text-decoration: none;
+	color: #78a411;
+}
+
+.h1:hover {
+	color: #355400;
+}
+
+.insertTr {
+	text-align: left;
+}
+
+.detailTr {
+	text-align: left;
+}
+
+.updateTr {
+	text-align: left;
+	width: 800px;
+}
+
+.commonDiv {
+	margin: auto;
+	width: 800px;
+	text-align: center;
+}
+
+input {
+	border: 1px solid #a1a1a1;
+}
+
+input[type="button"] {
+	border-radius: 15%;
+	border-color: #355400;
+	background-color: #355400;
+	color: #FFFFF0;
+	cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+	accent-color: purple;
+}
+
+input[type="radio"]:checked {
+	accent-color: purple;
+}
+
+table {
+	text-align: center;
+	border-collapse : collapse;
+	width: 100%;
+}
+
+th {
+	background-color: #9CAF72;
+	color: #355400;
+	padding: 10px;	
+	font-size: 14px;
+}
+
+tr:nth-child(odd) {
+	background-color: white;
+}
+
+tr:nth-child(even) {
+	background-color: #FFFFF0;
+}
+
+td {
+	max-width: 100px;
+/* 	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap; */
+	color: gray;
+	padding: 8px;
+	font-size: 15px;
+}
+
+a:link {
+	text-decoration: none;
+	color: gray;
+}
+
+a:vlink {
+	text-decoration: none;
+	color: purple;
+}
+
+a:alink {
+	color: red;
+}
+
+.idOk {
+	display: none;
+}
+
+.idAlready {
+	display: none;
+}
+
+/*페이징 관련 CSS부분*/
+.pagination li {
+	list-style: none;
+	display: inline-block;
+}
+
+.pagination a {
+	color: #355400;
+	font-weight: bold;
+	padding: 3px 8px;
+	border: 1px solid #dadada;
+	background-color: #F5F5DC;
+}

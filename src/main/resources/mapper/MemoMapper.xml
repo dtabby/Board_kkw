@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="memo">
+	
+	<!-- 기존 select문 -->
+	<!-- 
+	<sql id="memoWhere">
+		<where>
+			<if test="memoSearch != null and memoSearch != ''">
+				<choose>
+					<when test="memoSearch == 'memoName'">
+						user_name LIKE '%${memoWord}%'
+					</when>
+					<when test="memoSearch == 'memoId'">
+						user_id LIKE '%${memoWord}%'
+					</when>
+					<when test="memoSearch == 'memoContent'">
+						content LIKE '%${memoWord}%'
+					</when>
+					<when test="memoSearch == 'memoRegistId'">
+						regist_id LIKE '%${memoWord}%'
+					</when>
+				</choose>
+			</if>
+		</where>
+	</sql>
+	<include refid="memoWhere"/>
+	 -->
+
+	<!-- 페이징 관련 적용 추가 -->
+	<select id="memoSelect" resultType="com.topia.myapp.vo.MemoVO">
+		<![CDATA[
+		SELECT * FROM (
+			SELECT ROWNUM RN, A.* FROM
+			(
+				SELECT
+				    memo_num as memoNum,
+				    user_id as userId,
+				    CASE
+				        WHEN
+				        	length(user_name) > 4
+				        THEN
+				            substr(user_name, 1, 4) || '...'
+				        ELSE
+				            user_name
+					END as userName,
+				    CASE 
+				    	WHEN
+				    		length(title) > 20
+				    	THEN
+				    		substr(title, 1, 20) || '...'
+				    	ELSE
+				    		title
+				    END as title,
+				    CASE
+				    	WHEN
+				    		length(content) > 20
+				    	THEN
+				    		substr(content, 1, 20) || '...'
+				    	ELSE
+				    		content
+				    END as content,
+				    content_reply as contentReply,
+				    NVL(notice_YN, 'N') as noticeYN,
+				    TO_CHAR(write_date, 'YYYY-MM-DD') as writeDate,
+		            TO_CHAR(regist_date, 'YYYY-MM-DD') as registDate,
+				    TO_CHAR(update_date, 'YYYY-MM-DD') as updateDate,
+				    CASE
+				    	WHEN
+				    		length(regist_id) > 6
+				    	THEN
+				    		substr(regist_id, 1, 6) || '...'
+				    	ELSE
+				    		regist_id
+				    END as registId,
+				    CASE
+				    	WHEN
+				    		length(update_id) > 6
+				    	THEN
+				    		substr(update_id, 1, 6) || '...'
+				    	ELSE	
+				    		update_id
+				    END as updateId,
+				    NVL2(regist_ip, 'X.X.' || SUBSTR(regist_ip, INSTR(regist_ip, '.', 1, 2) + 1), regist_ip) AS registIp,
+                    NVL2(update_ip, 'X.X.' || SUBSTR(update_ip, INSTR(update_ip, '.', 1, 2) + 1), update_ip) AS updateIp
+				FROM
+				    memo_kkw
+				WHERE 1=1
+				]]>
+				<if test="memoSearch != null and memoSearch != ''">
+					<choose>
+						<when test="memoSearch == 'memoTitle'">
+							AND title LIKE '%${memoWord}%'
+						</when>
+						<when test="memoSearch == 'memoContent'">
+							AND content LIKE '%${memoWord}%'
+						</when>
+						<when test="memoSearch == 'memoName'">
+							AND user_name LIKE '%${memoWord}%'
+						</when>
+						<when test="memoSearch == 'memoRegistId'">
+							AND regist_id LIKE '%${memoWord}%'
+						</when>
+					</choose>
+				</if>
+				ORDER BY DECODE(notice_yn, 'Y', 1), regist_date DESC
+			) A
+		)
+		<![CDATA[
+		WHERE RN BETWEEN (#{criteria.page} - 1) * #{criteria.perPageNum} + 1  AND #{criteria.page} * #{criteria.perPageNum}
+		]]>
+	</select>
+	<!-- WHERE RN BETWEEN (#{criteria.currentPage} - 1) * #{criteria.amount} + 1  AND #{criteria.currentPage} * #{criteria.amount} -->
+	
+	<select id="memoDetailSelect" resultType="com.topia.myapp.vo.MemoVO">
+		SELECT 
+			memo_num as memoNum,
+			user_id as userId, 
+			user_name as userName, 
+			update_id as updateId,
+			title,
+			content,
+			NVL(notice_YN, 'N') as noticeYN,
+			content_reply as contentReply,
+			TO_CHAR(write_date, 'YYYY-MM-DD') as writeDate
+		FROM 
+			memo_kkw
+		WHERE 
+			memo_num = #{memoNum}
+	</select>
+	
+	<!-- 유저 아이디 중복 체크 -->
+	<select id="memoCheckId" resultType="int">
+		select 
+		    count(user_id) 
+		from 
+		    memo_kkw
+		where 
+		    memo_num = #{memoNum}
+	</select>
+	
+	<!-- 페이징 부분 수정중(총카운트) -->
+	<select id="memoPagingCount" resultType="Integer">
+		    SELECT 
+				count(*) as count
+		    FROM 
+		        memo_kkw
+			WHERE 1=1
+			<if test="memoSearch != null and memoSearch != ''">
+				<choose>
+					<when test="memoSearch == 'memoTitle'">
+						AND title LIKE '%${memoWord}%'
+					</when>
+					<when test="memoSearch == 'memoContent'">
+						AND content LIKE '%${memoWord}%'
+					</when>
+					<when test="memoSearch == 'memoName'">
+						AND user_name LIKE '%${memoWord}%'
+					</when>
+					<when test="memoSearch == 'memoRegistId'">
+						AND regist_id LIKE '%${memoWord}%'
+					</when>
+				</choose>
+			</if>
+	</select>
+	
+	<insert id="memoInsert">
+		INSERT INTO memo_kkw (
+			memo_num,
+			user_id,
+			user_name,
+			title,
+			content,
+			notice_yn,
+			write_date,	
+			regist_date,
+			regist_id,
+			regist_ip
+		) VALUES (
+			(select max(memo_num)+1 from memo_kkw),
+			#{userId},
+			#{userName},
+			#{title},
+			#{content},
+			#{noticeYN},
+			#{writeDate},
+			SYSDATE,
+			#{userId},
+			#{registIp}
+		)
+	</insert>
+	
+	<update id="memoUpdate">
+		update 
+		    memo_kkw 
+		set 
+		    title = #{title},
+		    content = #{content},
+		    content_reply = #{contentReply},
+		    notice_yn = #{noticeYN},
+		    write_date = #{writeDate},
+		    update_date = SYSDATE,
+		    update_id = #{updateId},
+		    update_ip = #{updateIp}
+		where
+		    memo_num = #{memoNum}
+	</update>
+	
+	<delete id="memoDelete">
+		delete 
+			memo_kkw
+		where
+			memo_num = #{memoNum}
+	</delete>
+</mapper>
